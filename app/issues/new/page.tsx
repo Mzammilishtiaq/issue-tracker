@@ -1,45 +1,47 @@
 'use client'
-import { Button, Callout, TextArea, TextField } from '@radix-ui/themes'
+import { Button, Callout, Text, TextField } from '@radix-ui/themes'
 import React, { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import dynamic from 'next/dynamic'
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-
+import { zodResolver } from '@hookform/resolvers/zod'
+import { createIssueSchema } from '@/app/createIssueSchema'
 // Dynamically import SimpleMDE
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), { ssr: false });
 import "easymde/dist/easymde.min.css";
-
-interface issuesFormProps {
-  title: string,
-  description: string
-}
+import { z } from 'zod'
+type issuesFormProps = z.infer<typeof createIssueSchema>
 
 const NewIssues = () => {
   const router = useRouter();
-  const { register, control, handleSubmit } = useForm<issuesFormProps>();
-const[error,setError]=useState('')
+  const { register, control, handleSubmit, formState: { errors } } = useForm<issuesFormProps>({
+    resolver: zodResolver(createIssueSchema)
+  });
+  const [error, setError] = useState('')
   return (
     <div className='max-w-xl '>
-    {error&&<Callout.Root color='red' className='mb-5'>
-         <Callout.Text>
+      {error && <Callout.Root color='red' className='mb-5'>
+        <Callout.Text>
           {error}
-         </Callout.Text>
-    </Callout.Root>}
-    <form className='space-y-3' onSubmit={handleSubmit(async (data) => {
-     try{
-      await axios.post('/api/issues', data);
-      router.push('/issues');
-      console.log(data);
-     }catch(err:any){
-      console.log(err)
-      setError('An unexpected error occurred.')
-     }
-    })}>
-      <TextField.Root placeholder="Title..." type='text' {...register('title')} />
-      <Controller name='description' control={control} render={({ field }) => <SimpleMDE placeholder='Description...' {...field} />} />
-      <Button className='btn btn-primary' type='submit'>Submit New Issue</Button>
-    </form>
+        </Callout.Text>
+      </Callout.Root>}
+      <form className='space-y-3' onSubmit={handleSubmit(async (data) => {
+        try {
+          await axios.post('/api/issues', data);
+          router.push('/issues');
+          console.log(data);
+        } catch (err: any) {
+          console.log(err)
+          setError('An unexpected error occurred.')
+        }
+      })}>
+        <TextField.Root placeholder="Title..." type='text' {...register('title')} />
+        {errors.title && <Text color='red' as='p'>{errors.title.message}</Text>}
+        <Controller name='description' control={control} render={({ field }) => <SimpleMDE placeholder='Description...' {...field} />} />
+        {errors.description && <Text color='red' as='p'>{errors.description.message}</Text>}
+        <Button className='btn btn-primary' type='submit'>Submit New Issue</Button>
+      </form>
     </div>
   )
 }

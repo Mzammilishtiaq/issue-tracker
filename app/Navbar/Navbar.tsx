@@ -17,15 +17,16 @@ const Navbar = () => {
             <ul className='flex space-x-6'>
                 {
                     links.map((link: any) => (
-                        <li>
-                            <Link key={link?.href}
+                        <li key={link.href}>
+                            <Link
                                 className={classNames({
                                     'text-zinc-900': link.href === currentPath,
                                     'text-zinc-500': link.href !== currentPath,
-                                    'hover:text-zinc-800 transition-colors':true
-                         })}
-                                href={link?.href}>
-                                {link?.label}
+                                    'hover:text-zinc-800 transition-colors': true
+                                })}
+                                href={link.href}
+                            >
+                                {link.label}
                             </Link>
                         </li>
                     ))
@@ -35,4 +36,4 @@ const Navbar = () => {
     )
 }
 
-export default Navbar
+export default Navbar;

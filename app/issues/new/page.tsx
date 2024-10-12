@@ -11,6 +11,7 @@ import { createIssueSchema } from '@/app/createIssueSchema'
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), { ssr: false });
 import "easymde/dist/easymde.min.css";
 import { z } from 'zod'
+import ErrorMessage from '@/app/components/ErrorMessage'
 type issuesFormProps = z.infer<typeof createIssueSchema>
 
 const NewIssues = () => {
@@ -37,9 +38,9 @@ const NewIssues = () => {
         }
       })}>
         <TextField.Root placeholder="Title..." type='text' {...register('title')} />
-        {errors.title && <Text color='red' as='p'>{errors.title.message}</Text>}
+        <ErrorMessage >{errors?.title?.message}</ErrorMessage>
         <Controller name='description' control={control} render={({ field }) => <SimpleMDE placeholder='Description...' {...field} />} />
-        {errors.description && <Text color='red' as='p'>{errors.description.message}</Text>}
+        <ErrorMessage>{errors?.description?.message}</ErrorMessage>
         <Button className='btn btn-primary' type='submit'>Submit New Issue</Button>
       </form>
     </div>

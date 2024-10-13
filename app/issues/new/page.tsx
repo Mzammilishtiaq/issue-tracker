@@ -12,6 +12,7 @@ const SimpleMDE = dynamic(() => import("react-simplemde-editor"), { ssr: false }
 import "easymde/dist/easymde.min.css";
 import { z } from 'zod'
 import ErrorMessage from '@/app/components/ErrorMessage'
+import Spinner from '@/app/components/Spinner'
 type issuesFormProps = z.infer<typeof createIssueSchema>
 
 const NewIssues = () => {
@@ -20,6 +21,7 @@ const NewIssues = () => {
     resolver: zodResolver(createIssueSchema)
   });
   const [error, setError] = useState('')
+  const [isSubmitted, setIsSubmitted] = useState(false)
   return (
     <div className='max-w-xl '>
       {error && <Callout.Root color='red' className='mb-5'>
@@ -29,10 +31,13 @@ const NewIssues = () => {
       </Callout.Root>}
       <form className='space-y-3' onSubmit={handleSubmit(async (data) => {
         try {
+          setIsSubmitted(true)
           await axios.post('/api/issues', data);
           router.push('/issues');
+          setIsSubmitted(false)
           console.log(data);
         } catch (err: any) {
+          setIsSubmitted(false)
           console.log(err)
           setError('An unexpected error occurred.')
         }
@@ -41,7 +46,7 @@ const NewIssues = () => {
         <ErrorMessage >{errors?.title?.message}</ErrorMessage>
         <Controller name='description' control={control} render={({ field }) => <SimpleMDE placeholder='Description...' {...field} />} />
         <ErrorMessage>{errors?.description?.message}</ErrorMessage>
-        <Button className='btn btn-primary' type='submit'>Submit New Issue</Button>
+        <Button disabled={isSubmitted} className='btn btn-primary' type='submit'>Submit New Issue {isSubmitted&&<Spinner/>}</Button>
       </form>
     </div>
   )

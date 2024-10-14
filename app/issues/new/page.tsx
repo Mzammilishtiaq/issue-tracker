@@ -22,6 +22,22 @@ const NewIssues = () => {
   });
   const [error, setError] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
+
+  const handlesSubmit = ()=>{
+    handleSubmit(async (data) => {
+      try {
+        setIsSubmitted(true)
+        await axios.post('/api/issues', data);
+        router.push('/issues');
+        setIsSubmitted(false)
+        console.log(data);
+      } catch (err: any) {
+        setIsSubmitted(false)
+        console.log(err)
+        setError('An unexpected error occurred.')
+      }
+    })
+  }
   return (
     <div className='max-w-xl '>
       {error && <Callout.Root color='red' className='mb-5'>
@@ -29,19 +45,7 @@ const NewIssues = () => {
           {error}
         </Callout.Text>
       </Callout.Root>}
-      <form className='space-y-3' onSubmit={handleSubmit(async (data) => {
-        try {
-          setIsSubmitted(true)
-          await axios.post('/api/issues', data);
-          router.push('/issues');
-          setIsSubmitted(false)
-          console.log(data);
-        } catch (err: any) {
-          setIsSubmitted(false)
-          console.log(err)
-          setError('An unexpected error occurred.')
-        }
-      })}>
+      <form className='space-y-3' onSubmit={handlesSubmit}>
         <TextField.Root placeholder="Title..." type='text' {...register('title')} />
         <ErrorMessage >{errors?.title?.message}</ErrorMessage>
         <Controller name='description' control={control} render={({ field }) => <SimpleMDE placeholder='Description...' {...field} />} />
